@@ -14,7 +14,7 @@ import Kingfisher
 class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
     
     @IBOutlet weak var home: UITableView!
-    var arrResponse = [[String:AnyObject]]() //Array of dictionary
+    var arrOfProducts = [[String:AnyObject]]() //Array of dictionary
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -34,10 +34,10 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
                 let swiftyJsonVar = JSON(responseData.result.value!)
 
                 if let resData = swiftyJsonVar.arrayObject {
-                    self.arrResponse = resData as! [[String:AnyObject]]
-                    print(self.arrResponse)
+                    self.arrOfProducts = resData as! [[String:AnyObject]]
+                    print(self.arrOfProducts)
                 }
-                if self.arrResponse.count > 0 {
+                if self.arrOfProducts.count > 0 {
                     self.home.reloadData()
                 }
             }
@@ -46,24 +46,39 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return arrResponse.count
+        return arrOfProducts.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
         let cell = tableView.dequeueReusableCell(withIdentifier: "CustomCell") as! CustomCell
-        let dict = arrResponse[indexPath.row]
+        let jsonData = arrOfProducts[indexPath.row]
         
-        let url = URL(string: dict["image"] as! String)
+        let url = URL(string: jsonData["image"] as! String)
         
-        cell.title.text = dict["title"] as? String
-        cell.homeDescription.text = dict["description"] as? String
+        cell.title.text = jsonData["title"] as? String
+        cell.homeDescription.text = jsonData["description"] as? String
         cell.homeImage.layer.masksToBounds = true
+        cell.homeImage.contentMode = .scaleToFill
         cell.homeImage.kf.setImage(with: url)
         
         
-        
         return cell
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        tableView.deselectRow(at: indexPath, animated: true)
+        let detail = DetailViewController()
+        let jsonData = arrOfProducts[indexPath.row]
+        let url = URL(string: jsonData["image"] as! String)
+        detail.modalPresentationStyle = .fullScreen
+        present(detail, animated: true)
+        
+        detail.detailTitle.text = jsonData["title"] as? String
+        detail.detailDescription.text = jsonData["description"] as? String
+        detail.detailDescription.sizeToFit()
+        detail.detailImage.kf.setImage(with: url)
+        detail.detailImage.contentMode = .scaleToFill
     }
 
 
